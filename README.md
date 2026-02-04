@@ -1,15 +1,20 @@
-# MarketScope
+# OddScope
 
-MarketScope is a desktop market analysis application for Stocks, Crypto, and Forex. It provides informational analysis only (no trade execution) with trend bias, key levels, confidence scoring, and idea generation.
+OddScope is a desktop sports betting market analysis app. It provides **informational analysis only** and does **not** place bets or automate wagering. The app focuses on transparent probability modeling, confidence scoring, and clear explanations for the most probable outcomes.
 
 ## Features
-- Multi-market support (stocks, crypto, forex)
-- Trend and momentum summary across timeframes
-- Support/resistance detection
-- Indicator suite (RSI, MACD, EMA, ATR, VWAP)
-- Confidence score with transparent scoring breakdown
-- Top 5 scanners for intraday and swing ideas
-- Demo mode with public endpoints and sample data fallback
+- Game & Market Explorer (Moneyline, Spread, Totals)
+- Odds comparison across sportsbooks with implied probability + best price highlight
+- Explainable “most probable outcome” engine with confidence scoring
+- Top 5 most confident picks + Top 5 best value picks
+- Simplistic vs Pro modes
+- Odds movement + probability charts (pyqtgraph)
+- Demo mode with sample JSON data
+- SQLite caching for games, odds snapshots, and user settings
+
+## Supported sports (MVP)
+- NBA
+- NHL
 
 ## Setup
 1. Install Python 3.11+
@@ -22,11 +27,20 @@ MarketScope is a desktop market analysis application for Stocks, Crypto, and For
    python main.py
    ```
 
-## Data providers
-MarketScope uses a pluggable data-client architecture. The default `DemoDataClient` provides sample data and can optionally use public endpoints. To add a new data source:
-1. Create a new client in `data/` that implements `MarketDataClient`.
-2. Register it in `data/client_factory.py`.
-3. Expose any optional API keys in Settings.
+## Demo mode
+OddScope ships with sample data in `data/oddscope_demo.json`. This demo mode is the default so the app can run without API keys.
+
+## Provider architecture
+OddScope uses a provider abstraction layer so you can swap data sources.
+
+1. Implement a sports stats provider in `data_providers/base.py` (`SportsDataProvider`).
+2. Implement an odds provider in `data_providers/base.py` (`OddsDataProvider`).
+3. Register both in `data_providers/registry.py` by returning a `ProviderBundle`.
+
+## Adding new leagues or books
+1. Add the league enum in `models/types.py`.
+2. Update providers to map API responses into `Game` and `MarketSnapshot`.
+3. Extend demo data (optional) with the new league and odds markets.
 
 ## Disclaimer
-MarketScope provides informational analysis only. It does not execute trades or provide financial guarantees.
+OddScope provides informational analysis only. No guaranteed outcomes. OddScope does **not** place bets. Bet responsibly.

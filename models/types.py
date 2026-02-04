@@ -5,96 +5,142 @@ from enum import Enum
 from typing import Dict, List, Optional
 
 
+class League(str, Enum):
+    NBA = "NBA"
+    NHL = "NHL"
+
+
 class MarketType(str, Enum):
-    STOCKS = "stocks"
-    CRYPTO = "crypto"
-    FOREX = "forex"
+    MONEYLINE = "Moneyline"
+    SPREAD = "Spread"
+    TOTAL = "Total"
 
 
-class TrendBias(str, Enum):
-    BULLISH = "Bullish"
-    BEARISH = "Bearish"
-    NEUTRAL = "Neutral"
+class OddsFormat(str, Enum):
+    AMERICAN = "American"
+    DECIMAL = "Decimal"
+    FRACTIONAL = "Fractional"
 
 
 @dataclass
-class PriceBar:
+class TeamMetrics:
+    team_strength: float
+    recent_form: float
+    matchup_edge: float
+    injury_impact: float
+    rest_travel: float
+    pace: float
+    efficiency: float
+
+
+@dataclass
+class GameContext:
+    injuries: str
+    form: str
+    matchup: str
+    schedule: str
+    market_movement: str
+    weather: Optional[str] = None
+
+
+@dataclass
+class Game:
+    id: str
+    league: League
+    start_time: str
+    home_team: str
+    away_team: str
+    venue: str
+    metrics_home: TeamMetrics
+    metrics_away: TeamMetrics
+    context: GameContext
+
+
+@dataclass
+class OddsMovementPoint:
     timestamp: str
-    open: float
-    high: float
-    low: float
-    close: float
-    volume: float
+    home: float
+    away: float
+    line: Optional[float] = None
 
 
 @dataclass
-class IndicatorSnapshot:
-    rsi: float
-    macd: float
-    macd_signal: float
-    ema_20: float
-    ema_50: float
-    ema_200: float
-    atr: float
-    vwap: Optional[float] = None
+class MarketOdds:
+    book: str
+    home: float
+    away: float
+    line: Optional[float]
+    updated_at: str
 
 
 @dataclass
-class KeyLevels:
-    support: List[float] = field(default_factory=list)
-    resistance: List[float] = field(default_factory=list)
-
-
-@dataclass
-class TradeIdea:
-    entry_zone: str
-    stop_zone: str
-    take_profit_targets: List[str]
-    invalidation: str
-    position_size_hint: str
-
-
-@dataclass
-class ConfidenceBreakdown:
-    trend_alignment: float
-    momentum: float
-    volatility: float
-    volume: float
-    structure_quality: float
-
-
-@dataclass
-class AnalysisResult:
-    symbol: str
+class MarketSnapshot:
+    game_id: str
     market: MarketType
-    bias: TrendBias
+    line: Optional[float]
+    books: List[MarketOdds]
+    movement: List[OddsMovementPoint] = field(default_factory=list)
+
+
+@dataclass
+class BreakdownScore:
+    team_strength: float
+    recent_form: float
+    matchup_edges: float
+    injuries: float
+    rest_travel: float
+    market_signal: float
+
+
+@dataclass
+class ModelOutput:
+    probability: float
     confidence: float
-    confidence_breakdown: ConfidenceBreakdown
-    key_levels: KeyLevels
-    indicators: IndicatorSnapshot
-    trend_summary: Dict[str, str]
-    momentum_notes: str
-    volatility_notes: str
-    structure_notes: str
-    risk_notes: List[str]
-    trade_idea: TradeIdea
+    breakdown: BreakdownScore
+    top_drivers: List[str]
+
+
+@dataclass
+class MarketRecommendation:
+    market: MarketType
+    pick: str
+    model_probability: float
+    implied_probability: float
+    confidence: float
+    breakdown: BreakdownScore
+    top_drivers: List[str]
+    expected_value: float
+    best_book: str
+    line: Optional[float]
+    why: List[str]
+    risk_flags: List[str]
+
+
+@dataclass
+class GameAnalysis:
+    game: Game
+    recommendations: Dict[MarketType, MarketRecommendation]
     updated_at: str
 
 
 @dataclass
 class ScannerFilters:
+    league: Optional[League] = None
     market: Optional[MarketType] = None
     min_confidence: float = 60.0
-    min_volume: float = 0.0
-    volatility_band: Optional[str] = None
-    timeframe: str = "15m"
+    min_edge: float = 0.0
+    books: List[str] = field(default_factory=list)
 
 
 @dataclass
 class ScannerResult:
-    symbol: str
+    game_id: str
+    matchup: str
+    league: League
     market: MarketType
+    pick: str
     confidence: float
-    expected_r: float
-    setup_quality: float
+    edge: float
     summary: str
+    best_book: str
+    start_time: str
